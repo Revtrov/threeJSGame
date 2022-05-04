@@ -12,12 +12,15 @@ let zoomFov = 30;
 miniMap.width = 400;
 miniMap.height = 400;
 
+let keyboard = new THREEx.KeyboardState();
+
 const scene = new THREE.Scene(),
     camera = new THREE.PerspectiveCamera(defaultFov, window.innerWidth / window.innerHeight, 0.0001, 30),
     renderer = new THREE.WebGLRenderer({
         canvas: document.getElementById("canvas"),
     }),
     controls = new PointerLockControls(camera, document.body);
+
 controls.connect();
 
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -26,6 +29,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 scene.fog = new THREE.Fog(0x000000, 0, fogDistance)
 
 camera.position.set(0, .03, 2);
+
 // lighting + helpers
 const cubeLight = new THREE.PointLight(0x00ff00, 10, 7, 20),
     pointLight = new THREE.PointLight(0xfcba03, 0.5, 1, 1),
@@ -43,7 +47,8 @@ const cubeTexture = new THREE.TextureLoader().load("texture.jpg"),
 cube.position.set(0, 0.5, 0)
 cubeLight.position.copy(cube.position)
 scene.add(cube, cubeLight);
-// floor
+let firstRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight)
+    // floor
 const floorTexture = new THREE.TextureLoader().load("floorTexture.png"),
     floorGeometry = new THREE.CircleGeometry(10, 32),
     floorMaterial = new THREE.MeshStandardMaterial({ map: floorTexture, side: THREE.DoubleSide }),
@@ -65,7 +70,7 @@ wallBlockTexture.repeat.set(100, 100);
 wallBlock.position.set(0, 0.5, 0)
 scene.add(wallBlock);
 //
-let speed = 0.004;
+let speed = 0.001;
 // background noise
 let ambientNoise = new Audio('ambientNoise.wav');
 if (typeof ambientNoise.loop == 'boolean') {
@@ -96,26 +101,7 @@ onkeydown = onkeyup = function(e) {
     e = e || event;
     map[e.keyCode] = e.type == 'keydown';
     controls.lock();
-    if (map[87] == true) {
-        controls.moveForward(speed)
-    }
-    if (map[16] == true && map[87] == true) {
-        controls.moveForward(speed * 1.25)
-    }
-    if (map[83] == true) {
-        controls.moveForward(speed * -1)
-    }
-    if (map[65] == true) {
-        controls.moveRight(speed * -1)
-    }
-    if (map[68] == true) {
-        controls.moveRight(speed)
-    }
-    if (map[90] == true) {
-        camera.fov = zoomFov;
-    } else {
-        camera.fov = defaultFov
-    }
+
 };
 // TODO: change to map
 document.addEventListener("keydown", (e) => {
@@ -152,6 +138,10 @@ bloomPass.radius = 0;
 composer.addPass(renderPass);
 composer.addPass(glitchPass);
 composer.addPass(bloomPass);
+
+// screen
+
+
 
 // location before 
 let notCollidePoint = [camera.position.x, camera.position.y, camera.position.z],
@@ -203,9 +193,30 @@ let miniMapRender = (objects, dirPoints) => {
     }
 
 }
+let direction = controls.getDirection(new THREE.Vector3().copy(camera.position));
 
 function animate() {
     requestAnimationFrame(animate);
+    if (keyboard.pressed("w") == true) {
+        controls.moveForward(speed)
+    }
+    if (keyboard.pressed("w") == true && keyboard.pressed("shift") == true) {
+        controls.moveForward(speed * 1.25)
+    }
+    if (keyboard.pressed("s") == true) {
+        controls.moveForward(speed * -1)
+    }
+    if (keyboard.pressed("a") == true) {
+        controls.moveRight(speed * -1)
+    }
+    if (keyboard.pressed("d") == true) {
+        controls.moveRight(speed)
+    }
+    if (keyboard.pressed("z") == true) {
+        camera.fov = zoomFov;
+    } else {
+        camera.fov = defaultFov
+    }
     // cube collision
     miniMapRender([camera, cube], [notCollidePoint, [camera.position.x, camera.position.y, camera.position.z]])
     let cubeBox = new THREE.Box3();
@@ -222,9 +233,12 @@ function animate() {
     // bind player light
     pointLight.position.set(camera.position.x, 0.04, camera.position.z);
     camera.updateProjectionMatrix();
-
+    renderer.setRenderTarget(firstRenderTarget);
+    cube.material = new THREE.MeshBasicMaterial({ map: firstRenderTarget.texture, color: 0xffffff, transparent: true, wireframe: false, })
     renderer.render(scene, camera);
-    composer.render();
+    renderer.setRenderTarget(null);
+    renderer.clear();
+    renderer.render(scene, camera);
 }
 
 animate()

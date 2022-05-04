@@ -9,6 +9,16 @@ body {
     width: 100%;
     position: fixed;
     left: 0;
+    opacity: 1;
+    top: 0;
+}
+
+#hud {
+    z-index: 5;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    left: 0;
     top: 0;
 }
 
