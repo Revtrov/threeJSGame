@@ -8,18 +8,14 @@ import { miniMapRender } from './minimap.js';
 import { movementUpdate } from './movement.js';
 import { settingsUpdate } from './settingsUpdate.js';
 import { collisionUpdate } from './collision.js';
+import { pixality, brightness, fogDistance } from './settingsUpdate.js'
 
 
-let fogDistance = document.getElementById("fogDistanceRange").value;
-let defaultFov = 90;
-let zoomFov = 30;
-let pixality = document.getElementById('pixelationRange').value;
-let inMenu;
-let brightness = document.getElementById("brightnessRange").value;
-miniMap.width = 400;
-miniMap.height = 400;
-
-let keyboard = new THREEx.KeyboardState();
+let
+    keyboard = new THREEx.KeyboardState(),
+    defaultFov = 90,
+    zoomFov = 30,
+    inMenu;
 
 const scene = new THREE.Scene(),
     camera = new THREE.PerspectiveCamera(defaultFov, window.innerWidth / window.innerHeight, 0.0001, 30),
@@ -36,8 +32,8 @@ renderer.setSize(window.innerWidth / pixality, window.innerHeight / pixality);
 camera.position.set(0, .04, 2);
 
 // lighting + helpers
-let ambientLight = { light: new THREE.AmbientLight(0xfcba03, brightness) }
-const cubeLight = new THREE.PointLight(0x00ff00, 10, 7, 20),
+const ambientLight = { light: new THREE.AmbientLight(0xfcba03, brightness) },
+    cubeLight = new THREE.PointLight(0x00ff00, 10, 7, 20),
     pointLight = new THREE.PointLight(0xfcba03, 0.5, 1, 1),
     lightHelper = new THREE.PointLightHelper(cubeLight),
     gridHelper = new THREE.GridHelper(800, 50);
@@ -133,7 +129,6 @@ function animate() {
     movementUpdate();
     collisionUpdate();
     miniMapRender([camera, cube])
-        // bind player light
     pointLight.position.set(camera.position.x, 0.04, camera.position.z);
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
@@ -151,4 +146,4 @@ function animate() {
 }
 
 animate()
-export { fogDistance, keyboard, THREE, camera, defaultFov, controls, speed, scene, ambientLight, renderer, cube, wallBlock, zoomFov }
+export { keyboard, THREE, camera, defaultFov, controls, speed, scene, ambientLight, renderer, cube, wallBlock, zoomFov }
