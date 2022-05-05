@@ -1,7 +1,7 @@
 import { fogDistance } from "./script.js";
 let miniMap = document.getElementById("miniMap");
 let miniCtx = miniMap.getContext("2d");
-let miniMapRender = (objects, dirPoints) => {
+let miniMapRender = (objects) => {
     miniCtx.globalCompositeOperation = 'destination-over'
     miniCtx.clearRect(0, 0, miniMap.width, miniMap.height);
     miniCtx.fillStyle = "rgba(0, 125, 0, 0.2)"
