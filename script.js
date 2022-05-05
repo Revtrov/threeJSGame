@@ -4,11 +4,14 @@ import { EffectComposer } from './EffectComposer.js';
 import { RenderPass } from './RenderPass.js';
 import { GlitchPass } from './GlitchPass.js';
 import { UnrealBloomPass } from './UnrealBloomPass.js';
-let miniMap = document.getElementById("miniMap");
-let miniCtx = miniMap.getContext("2d");
-let fogDistance = 4;
+import { miniMapRender } from './minimap.js';
+
+let fogDistance = document.getElementById("fogDistanceRange").value;
 let defaultFov = 90;
 let zoomFov = 30;
+let pixality = document.getElementById('pixelationRange').value;
+let inMenu;
+let brightness = document.getElementById("brightnessRange").value;
 miniMap.width = 400;
 miniMap.height = 400;
 
@@ -20,24 +23,22 @@ const scene = new THREE.Scene(),
         canvas: document.getElementById("canvas"),
     }),
     controls = new PointerLockControls(camera, document.body);
-
 controls.connect();
 
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth / pixality, window.innerHeight / pixality);
 
-scene.fog = new THREE.Fog(0x000000, 0, fogDistance)
 
 camera.position.set(0, .04, 2);
 
 // lighting + helpers
+let ambientLight = new THREE.AmbientLight(0xfcba03, brightness);
 const cubeLight = new THREE.PointLight(0x00ff00, 10, 7, 20),
     pointLight = new THREE.PointLight(0xfcba03, 0.5, 1, 1),
-    ambientLight = new THREE.AmbientLight(0xfcba03, 1.0),
     lightHelper = new THREE.PointLightHelper(cubeLight),
     gridHelper = new THREE.GridHelper(800, 50);
 
-pointLight.position.set(1, 2, 1)
+pointLight.position.set(1, 0.03, 1)
 scene.add(pointLight, ambientLight, /*lightHelper, gridHelper*/ );
 // cube
 const cubeTexture = new THREE.TextureLoader().load("texture.jpg"),
@@ -82,7 +83,9 @@ if (typeof ambientNoise.loop == 'boolean') {
     }, false);
 }
 document.addEventListener("click", (e) => {
-        controls.lock()
+        if (inMenu !== true) {
+            controls.lock()
+        }
         ambientNoise.play();
     })
     // movement noises
@@ -100,16 +103,30 @@ let map = [];
 onkeydown = onkeyup = function(e) {
     e = e || event;
     map[e.keyCode] = e.type == 'keydown';
-    controls.lock();
 
 };
-// TODO: change to map
+let toggleSettings = () => {
+        let opacity = parseFloat(getComputedStyle(document.getElementById("settings")).getPropertyValue("opacity"));
+        if (opacity == 0) {
+            document.getElementById("settings").style.opacity = 1;
+            inMenu = true;
+            controls.unlock();
+        } else {
+            inMenu = false;
+            document.getElementById("settings").style.opacity = 0;
+            controls.lock();
+
+        }
+    }
+    // TODO: change to map
 document.addEventListener("keydown", (e) => {
-    if (e.key == "w" || e.key == "a" || e.key == "s" || e.key == "d") {
+    if (e.key == "w" || e.key == "a" || e.key == "s" || e.key == "d" || e.key == "w" && e.key == "shift") {
         footsteps.volume = 1;
         footsteps.play();
     }
-
+    if (e.key == "p") {
+        toggleSettings();
+    }
 
 });
 document.addEventListener("keyup", (e) => {
@@ -139,64 +156,20 @@ composer.addPass(renderPass);
 composer.addPass(glitchPass);
 composer.addPass(bloomPass);
 
-// screen
-
-
-
 // location before 
-let notCollidePoint = [camera.position.x, camera.position.y, camera.position.z],
-    dist = (a, b) => {
-        return Math.sqrt(Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2))
-    }
-let miniMapRender = (objects, dirPoints) => {
-    miniCtx.globalCompositeOperation = 'destination-over'
-    miniCtx.clearRect(0, 0, miniMap.width, miniMap.height);
-    miniCtx.fillStyle = "rgba(0, 125, 0, 0.2)"
-    miniCtx.fillRect(10, 10, miniMap.width - 20, miniMap.height - 20)
-    miniCtx.fillRect(0, 0, miniMap.width, miniMap.height);
-    for (let i = 0; i < objects.length; i++) {
-        miniCtx.beginPath();
-        if (i == 0) {
-            miniCtx.globalCompositeOperation = 'destination-out'
-            miniCtx.beginPath();
-            miniCtx.arc(
-                ((miniMap.width - 20) / 2) + ((((miniMap.width - 40) / 1) / 10) * objects[i].position.x),
-                ((miniMap.height - 20) / 2) + ((((miniMap.height - 40) / 1) / 10) * objects[i].position.z),
-                ((miniMap.width / 100) * fogDistance), 0, 2 * Math.PI
-            );
-            miniCtx.fill()
-            miniCtx.stroke();
+let notCollidePoint = [camera.position.x, camera.position.y, camera.position.z];
 
-            miniCtx.beginPath();
-            miniCtx.fillStyle = "red";
-            miniCtx.globalCompositeOperation = 'destination-over'
-            miniCtx.arc(
-                ((miniMap.width - 20) / 2) + ((((miniMap.width - 40) / 1) / 10) * objects[i].position.x),
-                ((miniMap.height - 20) / 2) + ((((miniMap.height - 40) / 1) / 10) * objects[i].position.z),
-                ((miniMap.width / 100)) * 1, 0, 2 * Math.PI
-            );
-            miniCtx.fill()
-            miniCtx.stroke();
-
-        } else {
-            miniCtx.fillStyle = "green";
-            miniCtx.globalCompositeOperation = 'destination-over'
-            miniCtx.arc(
-                ((miniMap.width - 20) / 2) + ((((miniMap.width - 40) / 1) / 10) * objects[i].position.x),
-                ((miniMap.height - 20) / 2) + ((((miniMap.height - 40) / 1) / 10) * objects[i].position.z),
-                ((miniMap.width / 100)) * objects[i].geometry.parameters.width * 2, 0, 2 * Math.PI
-            );
-        }
-
-        miniCtx.fill()
-        miniCtx.stroke();
-    }
-
-}
 let direction = controls.getDirection(new THREE.Vector3().copy(camera.position));
 
 function animate() {
     requestAnimationFrame(animate);
+    pixality = document.getElementById('pixelationRange').value;
+    brightness = document.getElementById("brightnessRange").value / 100;
+    scene.fog = new THREE.Fog(0x000000, 0, fogDistance)
+    scene.remove(ambientLight);
+
+    ambientLight = new THREE.AmbientLight(0xfcba03, brightness);
+    scene.add(ambientLight)
     if (keyboard.pressed("w") == true) {
         controls.moveForward(speed)
     }
@@ -219,10 +192,10 @@ function animate() {
     }
     // cube collision
     miniMapRender([camera, cube], [notCollidePoint, [camera.position.x, camera.position.y, camera.position.z]])
+    fogDistance = document.getElementById("fogDistanceRange").value;
     let cubeBox = new THREE.Box3();
     let playArea = new THREE.Box3();
     cubeBox.setFromObject(cube);
-
     playArea.setFromObject(wallBlock);
     if (cubeBox.containsPoint(new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z)) == false && playArea.containsPoint(new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z))) {
         notCollidePoint = [camera.position.x, camera.position.y, camera.position.z];
@@ -234,18 +207,20 @@ function animate() {
     pointLight.position.set(camera.position.x, 0.04, camera.position.z);
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(1);
     renderer.setRenderTarget(firstRenderTarget);
     cube.material = new THREE.MeshBasicMaterial({ map: cubeTexture, color: 0xffffff, transparent: true, wireframe: true, })
-    renderer.setPixelRatio(1);
 
     renderer.render(scene, camera);
     renderer.setRenderTarget(null);
     renderer.clear();
     cube.material = new THREE.MeshBasicMaterial({ map: firstRenderTarget.texture, color: 0xffffff, transparent: true, wireframe: false, })
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth / pixality, window.innerHeight / pixality);
 
     renderer.render(scene, camera);
 }
 
 animate()
+export { fogDistance }

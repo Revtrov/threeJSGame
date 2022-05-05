@@ -11,7 +11,17 @@
 
 <body>
     <div id="inventory"></div>
-
+    <div id="settings">
+        <div id="brightness">Brightness:
+            <input id="brightnessRange" type="range" value="1" max="100" min="1">
+        </div>
+        <div id="pixelation">Pixelation:
+            <input id="pixelationRange" type="range" value="1" max="5" min="1">
+        </div>
+        <div id="fogDistance">Fog Distance:
+            <input id="fogDistanceRange" type="range" value="4" max="10" min="0">
+        </div>
+    </div>
     <canvas id="canvas"></canvas>
     <canvas id="hud"></canvas>
     <canvas id="miniMap"></canvas>
