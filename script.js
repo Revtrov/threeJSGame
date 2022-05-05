@@ -28,12 +28,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 scene.fog = new THREE.Fog(0x000000, 0, fogDistance)
 
-camera.position.set(0, .03, 2);
+camera.position.set(0, .04, 2);
 
 // lighting + helpers
 const cubeLight = new THREE.PointLight(0x00ff00, 10, 7, 20),
     pointLight = new THREE.PointLight(0xfcba03, 0.5, 1, 1),
-    ambientLight = new THREE.AmbientLight(0xfcba03, 0.0),
+    ambientLight = new THREE.AmbientLight(0xfcba03, 1.0),
     lightHelper = new THREE.PointLightHelper(cubeLight),
     gridHelper = new THREE.GridHelper(800, 50);
 
@@ -47,7 +47,7 @@ const cubeTexture = new THREE.TextureLoader().load("texture.jpg"),
 cube.position.set(0, 0.5, 0)
 cubeLight.position.copy(cube.position)
 scene.add(cube, cubeLight);
-let firstRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight)
+let firstRenderTarget = new THREE.WebGLRenderTarget(1000, 1000)
     // floor
 const floorTexture = new THREE.TextureLoader().load("floorTexture.png"),
     floorGeometry = new THREE.CircleGeometry(10, 32),
@@ -233,11 +233,13 @@ function animate() {
     // bind player light
     pointLight.position.set(camera.position.x, 0.04, camera.position.z);
     camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
     renderer.setRenderTarget(firstRenderTarget);
-    cube.material = new THREE.MeshBasicMaterial({ map: firstRenderTarget.texture, color: 0xffffff, transparent: true, wireframe: false, })
+    cube.material = new THREE.MeshBasicMaterial({ map: cubeTexture, color: 0xffffff, transparent: true, wireframe: true, })
     renderer.render(scene, camera);
     renderer.setRenderTarget(null);
     renderer.clear();
+    cube.material = new THREE.MeshBasicMaterial({ map: firstRenderTarget.texture, color: 0xffffff, transparent: true, wireframe: false, })
     renderer.render(scene, camera);
 }
 
