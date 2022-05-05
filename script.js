@@ -47,7 +47,7 @@ const cubeTexture = new THREE.TextureLoader().load("texture.jpg"),
 cube.position.set(0, 0.5, 0)
 cubeLight.position.copy(cube.position)
 scene.add(cube, cubeLight);
-let firstRenderTarget = new THREE.WebGLRenderTarget(1000, 1000)
+let firstRenderTarget = new THREE.WebGLRenderTarget(2000, 2000)
     // floor
 const floorTexture = new THREE.TextureLoader().load("floorTexture.png"),
     floorGeometry = new THREE.CircleGeometry(10, 32),
@@ -236,10 +236,15 @@ function animate() {
     renderer.render(scene, camera);
     renderer.setRenderTarget(firstRenderTarget);
     cube.material = new THREE.MeshBasicMaterial({ map: cubeTexture, color: 0xffffff, transparent: true, wireframe: true, })
+    renderer.setPixelRatio(1);
+
     renderer.render(scene, camera);
     renderer.setRenderTarget(null);
     renderer.clear();
     cube.material = new THREE.MeshBasicMaterial({ map: firstRenderTarget.texture, color: 0xffffff, transparent: true, wireframe: false, })
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
     renderer.render(scene, camera);
 }
 
