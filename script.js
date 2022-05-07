@@ -9,6 +9,7 @@ import { movementUpdate } from './movement.js';
 import { settingsUpdate } from './settingsUpdate.js';
 import { collisionUpdate } from './collision.js';
 import { pixality, brightness, fogDistance } from './settingsUpdate.js'
+import { STLLoader } from './STLLoader.js'
 
 
 let
@@ -16,7 +17,6 @@ let
     defaultFov = 90,
     zoomFov = 30,
     inMenu;
-
 const scene = new THREE.Scene(),
     camera = new THREE.PerspectiveCamera(defaultFov, window.innerWidth / window.innerHeight, 0.0001, 30),
     renderer = new THREE.WebGLRenderer({
@@ -29,7 +29,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth / pixality, window.innerHeight / pixality);
 
 
-camera.position.set(0, .04, 2);
+camera.position.set(0, 0.04, 2);
 
 // lighting + helpers
 const ambientLight = { light: new THREE.AmbientLight(0xfcba03, brightness) },
@@ -70,6 +70,47 @@ wallBlockTexture.wrapT = THREE.RepeatWrapping;
 wallBlockTexture.repeat.set(100, 100);
 wallBlock.position.set(0, 0.5, 0)
 scene.add(wallBlock);
+
+const loader = new STLLoader();
+let nose;
+let noseBox;
+let noseBox3;
+loader.load('nose.stl', function(geometry) {
+
+    const positionAttribute = geometry.attributes.position;
+
+    const colors = [];
+    const color = new THREE.Color();
+
+    for (let i = 0, il = positionAttribute.count; i < il; i++) {
+
+        color.setHSL(i * Math.random(), 0.7, 0.7);
+        colors.push(color.r, color.g, color.b);
+
+    }
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+    const material = new THREE.MeshBasicMaterial({ map: cubeTexture, wireframe: false, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false, vertexColors: THREE.VertexColors });
+    const mesh = new THREE.Mesh(geometry, material);
+
+    mesh.position.set(0, -0.04, 1);
+    mesh.rotation.set(-(90 * Math.PI / 180), 0, 0);
+    mesh.scale.set(.001, .001, .001);
+
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    nose = mesh;
+    scene.add(mesh);
+    noseBox3 = new THREE.Box3();
+    noseBox = new THREE.BoxHelper(mesh, 0xff0000);
+    noseBox3.setFromObject(noseBox);
+    noseBox.update();
+    scene.add(noseBox);
+
+});
+
+// load a resource
+
 //
 let speed = 0.001;
 // background noise
@@ -122,13 +163,12 @@ composer.addPass(bloomPass);
 
 // location before 
 
-let direction = controls.getDirection(new THREE.Vector3().copy(camera.position));
 
 function animate() {
     requestAnimationFrame(animate);
     movementUpdate();
     collisionUpdate();
-    miniMapRender([camera, cube])
+    miniMapRender([camera, cube, noseBox3])
     pointLight.position.set(camera.position.x, 0.04, camera.position.z);
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
@@ -146,4 +186,4 @@ function animate() {
 }
 
 animate()
-export { keyboard, THREE, camera, defaultFov, controls, speed, scene, ambientLight, renderer, cube, wallBlock, zoomFov }
+export { keyboard, THREE, camera, defaultFov, controls, speed, scene, ambientLight, renderer, cube, wallBlock, zoomFov, noseBox }
