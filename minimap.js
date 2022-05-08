@@ -40,7 +40,7 @@ let miniMap = document.getElementById("miniMap"),
                     miniCtx.arc(
                         ((miniMap.width - 20) / 2) + ((((miniMap.width - 40) / 1) / 10) * objects[i].getCenter(new THREE.Vector3(0, 0, 0)).x),
                         ((miniMap.height - 20) / 2) + ((((miniMap.height - 40) / 1) / 10) * objects[i].getCenter(new THREE.Vector3(0, 0, 0)).z),
-                        ((miniMap.width / 100)) * objects[i].getSize(new THREE.Vector3(0, 0, 0)).x * 2, 0, 2 * Math.PI
+                        ((miniMap.width / 100)) * objects[i].getSize(new THREE.Vector3(0, 0, 0)).x * 20, 0, 2 * Math.PI
                     );
                 } else {
                     miniCtx.fillStyle = "green";

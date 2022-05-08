@@ -85,13 +85,13 @@ loader.load('Among_US.stl', function(geometry) {
 
     for (let i = 0, il = positionAttribute.count; i < il; i++) {
 
-        color.setHSL(i * Math.random(), 0.7, 0.7);
+        color.setHSL(i * Math.random(), 0.4, 0.4);
         colors.push(color.r, color.g, color.b);
 
     }
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 4));
 
-    const material = new THREE.MeshBasicMaterial({ map: cubeTexture, wireframe: false, transparent: true, opacity: 0.8, depthWrite: true, vertexColors: THREE.VertexColors });
+    const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: false, transparent: true, opacity: 0.8, depthWrite: true, vertexColors: THREE.VertexColors });
     const mesh = new THREE.Mesh(geometry, material);
 
     mesh.position.set(0, .0, 1);
@@ -102,9 +102,8 @@ loader.load('Among_US.stl', function(geometry) {
     nose = mesh;
     scene.add(mesh);
     noseBox3 = new THREE.Box3();
-    noseBox = new THREE.BoxHelper(mesh, 0xff0000);
-    noseBox3.setFromObject(noseBox);
-    noseBox.update();
+    // noseBox = new THREE.BoxHelper(mesh, 0xff0000);
+    // noseBox3.setFromObject(noseBox)
     scene.add(noseBox);
 
 });
@@ -162,14 +161,20 @@ composer.addPass(glitchPass);
 composer.addPass(bloomPass);
 
 // location before 
-
+let dist = (x1, y1, x2, y2) => {
+    return Math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
+}
 
 function animate() {
     requestAnimationFrame(animate);
     movementUpdate();
-    collisionUpdate();
     nose.lookAt(camera.position.x, 0, camera.position.z);
     nose.rotateX(-90 * (Math.PI / 180))
+    noseBox3.setFromObject(nose);
+    collisionUpdate();
+    if (dist(camera.position.x, camera.position.z, nose.position.x, nose.position.z) > 0.05) {
+        nose.translateY(-0.007 * dist(camera.position.x, camera.position.z, nose.position.x, nose.position.z) / 2);
+    }
     miniMapRender([camera, cube, noseBox3])
     pointLight.position.set(camera.position.x, 0.04, camera.position.z);
     camera.updateProjectionMatrix();
@@ -188,4 +193,4 @@ function animate() {
 }
 
 animate()
-export { keyboard, THREE, camera, defaultFov, controls, speed, scene, ambientLight, renderer, cube, wallBlock, zoomFov, noseBox }
+export { keyboard, THREE, camera, defaultFov, controls, speed, scene, ambientLight, renderer, cube, wallBlock, zoomFov, noseBox3 }
