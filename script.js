@@ -22,6 +22,7 @@ const scene = new THREE.Scene(),
     renderer = new THREE.WebGLRenderer({
         canvas: document.getElementById("canvas"),
     }),
+    camera2 = new THREE.PerspectiveCamera(defaultFov, window.innerWidth / window.innerHeight, 0.0001, 30),
     controls = new PointerLockControls(camera, document.body);
 controls.connect();
 
@@ -75,7 +76,7 @@ const loader = new STLLoader();
 let nose;
 let noseBox;
 let noseBox3;
-loader.load('nose.stl', function(geometry) {
+loader.load('Among_US.stl', function(geometry) {
 
     const positionAttribute = geometry.attributes.position;
 
@@ -90,13 +91,12 @@ loader.load('nose.stl', function(geometry) {
     }
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-    const material = new THREE.MeshBasicMaterial({ map: cubeTexture, wireframe: false, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false, vertexColors: THREE.VertexColors });
+    const material = new THREE.MeshBasicMaterial({ map: cubeTexture, wireframe: false, transparent: true, opacity: 0.8, depthWrite: true, vertexColors: THREE.VertexColors });
     const mesh = new THREE.Mesh(geometry, material);
 
-    mesh.position.set(0, -0.04, 1);
-    mesh.rotation.set(-(90 * Math.PI / 180), 0, 0);
+    mesh.position.set(0, .0, 1);
+    mesh.rotation.set((-90 * Math.PI / 180), 0, 0);
     mesh.scale.set(.001, .001, .001);
-
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     nose = mesh;
@@ -168,6 +168,8 @@ function animate() {
     requestAnimationFrame(animate);
     movementUpdate();
     collisionUpdate();
+    nose.lookAt(camera.position.x, 0, camera.position.z);
+    nose.rotateX(-90 * (Math.PI / 180))
     miniMapRender([camera, cube, noseBox3])
     pointLight.position.set(camera.position.x, 0.04, camera.position.z);
     camera.updateProjectionMatrix();
