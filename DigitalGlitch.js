@@ -12,17 +12,17 @@ const DigitalGlitch = {
 
     uniforms: {
 
-        'tDiffuse': { value: false }, //diffuse texture
+        'tDiffuse': { value: null }, //diffuse texture
         'tDisp': { value: null }, //displacement texture for digital glitch squares
-        'byp': { value: 1 }, //apply the glitch ?
-        'amount': { value: .8 },
-        'angle': { value: 0.29 },
-        'seed': { value: 0.2 },
+        'byp': { value: 0 }, //apply the glitch ?
+        'amount': { value: 0.10 },
+        'angle': { value: 0.04 },
+        'seed': { value: 0.02 },
         'seed_x': { value: 0.02 }, //-1,1
         'seed_y': { value: 0.02 }, //-1,1
-        'distortion_x': { value: 0.5 },
+        'distortion_x': { value: 0.6 },
         'distortion_y': { value: 0.6 },
-        'col_s': { value: 0 }
+        'col_s': { value: 0.0 }
     },
 
     vertexShader: /* glsl */ `

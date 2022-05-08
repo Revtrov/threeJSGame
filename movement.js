@@ -18,10 +18,16 @@ if (typeof footsteps.loop == 'boolean') {
         this.play();
     }, false);
 }
+for (let i = 0; i < 100; i++) {
+    map.push(false);
+}
 onkeydown = onkeyup = function(e) {
     e = e || event;
     map[e.keyCode] = e.type == 'keydown';
-    if (map[87] == true && map[16] == true) {
+    movementUpdate()
+    if (map[87] == true && map[16] == true ||
+        map[65] == true && map[16] == true ||
+        map[68] == true && map[16] == true) {
         footsteps.pause();
         runningFootsteps.volume = 1;
         runningFootsteps.play();
@@ -36,7 +42,7 @@ onkeydown = onkeyup = function(e) {
 let movementUpdate = () => {
 
     function fade() {
-        if (map[87] == false) {
+        if (map[87] == false && map[65] == false && map[68] == false) {
             if (footsteps.volume > 0.1) {
                 footsteps.volume -= 0.05;
                 setTimeout(fade, 2);
@@ -50,12 +56,14 @@ let movementUpdate = () => {
                 runningFootsteps.pause();
             }
         } else {
-            if (map[87] == true && map[16] == false) {
-                if (runningFootsteps.volume > 0.1) {
-                    runningFootsteps.volume -= 0.05;
-                    setTimeout(fade, 2);
-                } else {
-                    runningFootsteps.pause();
+            if (map[87] == true || map[65] == true || map[68] == true) {
+                if (map[16] == false) {
+                    if (runningFootsteps.volume > 0.1) {
+                        runningFootsteps.volume -= 0.05;
+                        setTimeout(fade, 2);
+                    } else {
+                        runningFootsteps.pause();
+                    }
                 }
             }
         }
@@ -67,6 +75,12 @@ let movementUpdate = () => {
     }
     if (keyboard.pressed("w") == true && keyboard.pressed("shift") == true) {
         controls.moveForward(speed * 1.25)
+    }
+    if (keyboard.pressed("a") == true && keyboard.pressed("shift") == true) {
+        controls.moveRight(speed * -1.25)
+    }
+    if (keyboard.pressed("d") == true && keyboard.pressed("shift") == true) {
+        controls.moveRight(speed * 1.25)
     }
     if (keyboard.pressed("s") == true) {
         controls.moveForward(speed * -1)

@@ -77,23 +77,16 @@ let nose;
 let noseBox;
 let noseBox3;
 loader.load('Among_US.stl', function(geometry) {
-
     const positionAttribute = geometry.attributes.position;
-
     const colors = [];
     const color = new THREE.Color();
-
-    for (let i = 0, il = positionAttribute.count; i < il; i++) {
-
+    for (let i = 0, il = positionAttribute.count; i <= il; i++) {
         color.setHSL(i * Math.random(), 0.4, 0.4);
         colors.push(color.r, color.g, color.b);
-
     }
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 4));
-
-    const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: false, transparent: true, opacity: 0.8, depthWrite: true, vertexColors: THREE.VertexColors });
+    const material = new THREE.MeshStandardMaterial({ color: 0xff0000, wireframe: false, transparent: true, opacity: 0.8, depthWrite: true, vertexColors: THREE.VertexColors });
     const mesh = new THREE.Mesh(geometry, material);
-
     mesh.position.set(0, .0, 1);
     mesh.rotation.set((-90 * Math.PI / 180), 0, 0);
     mesh.scale.set(.001, .001, .001);
@@ -104,7 +97,7 @@ loader.load('Among_US.stl', function(geometry) {
     noseBox3 = new THREE.Box3();
     // noseBox = new THREE.BoxHelper(mesh, 0xff0000);
     // noseBox3.setFromObject(noseBox)
-    scene.add(noseBox);
+    //scene.add(noseBox);
 
 });
 
@@ -149,8 +142,10 @@ document.addEventListener("keydown", (e) => {
 const composer = new EffectComposer(renderer),
     renderPass = new RenderPass(scene, camera);
 
+composer.setSize(window.innerWidth, window.innerHeight)
 const glitchPass = new GlitchPass();
 glitchPass.goWild = true;
+glitchPass.renderToScreen = true;
 
 const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
 bloomPass.threshold = 0;
@@ -159,7 +154,6 @@ bloomPass.radius = 0;
 composer.addPass(renderPass);
 composer.addPass(glitchPass);
 composer.addPass(bloomPass);
-
 // location before 
 let dist = (x1, y1, x2, y2) => {
     return Math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
@@ -167,14 +161,16 @@ let dist = (x1, y1, x2, y2) => {
 
 function animate() {
     requestAnimationFrame(animate);
+    try {
+        nose.lookAt(camera.position.x, 0, camera.position.z);
+        nose.rotateX(-90 * (Math.PI / 180))
+        noseBox3.setFromObject(nose);
+        collisionUpdate();
+        if (dist(camera.position.x, camera.position.z, nose.position.x, nose.position.z) > 0.2) {
+            nose.translateY(-0.007 * dist(camera.position.x, camera.position.z, nose.position.x, nose.position.z) / 2);
+        }
+    } catch (e) {}
     movementUpdate();
-    nose.lookAt(camera.position.x, 0, camera.position.z);
-    nose.rotateX(-90 * (Math.PI / 180))
-    noseBox3.setFromObject(nose);
-    collisionUpdate();
-    if (dist(camera.position.x, camera.position.z, nose.position.x, nose.position.z) > 0.05) {
-        nose.translateY(-0.007 * dist(camera.position.x, camera.position.z, nose.position.x, nose.position.z) / 2);
-    }
     miniMapRender([camera, cube, noseBox3])
     pointLight.position.set(camera.position.x, 0.04, camera.position.z);
     camera.updateProjectionMatrix();
@@ -184,10 +180,12 @@ function animate() {
     renderer.setRenderTarget(firstRenderTarget);
     cube.material = new THREE.MeshBasicMaterial({ map: cubeTexture, color: 0xffffff, transparent: true, wireframe: true, })
     renderer.render(scene, camera);
-    renderer.setRenderTarget(null);
-    renderer.clear();
     cube.material = new THREE.MeshBasicMaterial({ map: firstRenderTarget.texture, color: 0xffffff, transparent: true, wireframe: false, })
-        // keep here
+    renderer.setRenderTarget(null);
+    renderer.setRenderTarget(composer.renderTarget1);
+    composer.render()
+    renderer.clear();
+    // keep here
     settingsUpdate()
     renderer.render(scene, camera);
 }
