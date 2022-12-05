@@ -30,7 +30,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth / pixality, window.innerHeight / pixality);
 
 
-camera.position.set(0, 0.04, 2);
+camera.position.set(0, 0.07, 2);
 
 // lighting + helpers
 const ambientLight = { light: new THREE.AmbientLight(0xfcba03, brightness) },
@@ -104,7 +104,7 @@ loader.load('Among_US.stl', function(geometry) {
 // load a resource
 
 //
-let speed = 0.001;
+let speed = 0.008;
 // background noise
 let ambientNoise = new Audio('ambientNoise.wav');
 if (typeof ambientNoise.loop == 'boolean') {
@@ -167,7 +167,7 @@ function animate() {
         noseBox3.setFromObject(nose);
         collisionUpdate();
         if (dist(camera.position.x, camera.position.z, nose.position.x, nose.position.z) > 0.2) {
-            nose.translateY(-0.007 * dist(camera.position.x, camera.position.z, nose.position.x, nose.position.z) / 2);
+            nose.translateY(-0.009 * dist(camera.position.x, camera.position.z, nose.position.x, nose.position.z) / 2);
         }
     } catch (e) {}
     movementUpdate();
@@ -185,7 +185,7 @@ function animate() {
     cube.material = new THREE.MeshBasicMaterial({ map: firstRenderTarget.texture, color: 0xffffff, transparent: true, wireframe: false, })
     renderer.setRenderTarget(null);
     renderer.setRenderTarget(composer.renderTarget1);
-    settingsUpdate() 
+    settingsUpdate()
     composer.render()
     renderer.clear();
     camera.fov = 120;
