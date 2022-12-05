@@ -178,15 +178,19 @@ function animate() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(1);
     renderer.setRenderTarget(firstRenderTarget);
+    camera.fov = 90;
+    camera.updateProjectionMatrix();
     cube.material = new THREE.MeshBasicMaterial({ map: cubeTexture, color: 0xffffff, transparent: true, wireframe: true, })
     renderer.render(scene, camera);
     cube.material = new THREE.MeshBasicMaterial({ map: firstRenderTarget.texture, color: 0xffffff, transparent: true, wireframe: false, })
     renderer.setRenderTarget(null);
     renderer.setRenderTarget(composer.renderTarget1);
+    settingsUpdate() 
     composer.render()
     renderer.clear();
+    camera.fov = 120;
+    camera.updateProjectionMatrix();
     // keep here
-    settingsUpdate()
     renderer.render(scene, camera);
 }
 
